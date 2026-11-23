@@ -26,8 +26,9 @@ export async function connectReports(identification:string,password:string){
   const client=await signInByIdentification(identification,password);
   await adoptReportClient(client);
 }
-export async function adoptReportClient(client:Client){
+export async function adoptReportClient(client:Client,isCurrent=()=>true){
   const {data,error}=await client.rpc('report_permissions');
+  if(!isCurrent())return;
   if(error||!(data?.artwork||data?.transfers)){
     await client.auth.signOut({scope:'local'});
     throw Error('La cuenta no tiene acceso a informes o la configuración institucional no está lista. Verifique sus permisos y el cambio de contraseña temporal.');
@@ -44,11 +45,14 @@ export async function adoptReportClient(client:Client){
   unsubscribeAuth=()=>subscription.unsubscribe();
 }
 
-export async function disconnectReports(){
-  const previous=session;
+export function clearReportSession(){
   setSession(null);
   unsubscribeAuth?.();
   unsubscribeAuth=undefined;
+}
+export async function disconnectReports(){
+  const previous=session;
+  clearReportSession();
   if(previous)await previous.client.auth.signOut({scope:'local'});
 }
 

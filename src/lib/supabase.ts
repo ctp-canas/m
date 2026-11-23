@@ -1,11 +1,14 @@
 import {createClient,type SupabaseClient} from '@supabase/supabase-js';
+import {authStorageKey,createSessionStorage} from './session-logout';
 
 export const configured=Boolean(import.meta.env.VITE_SUPABASE_URL&&import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
+export const institutionalStorageKey=configured?authStorageKey(import.meta.env.VITE_SUPABASE_URL):'matricula-no-configurada';
+export const institutionalSessionStorage=createSessionStorage(institutionalStorageKey,()=>window.localStorage);
 let client:SupabaseClient|undefined;
 export function institutionalClient(){
   if(!configured)throw Error('La conexión con Supabase todavía no está configurada.');
   return client??=createClient(import.meta.env.VITE_SUPABASE_URL,import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,{
-    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true},
+    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:institutionalStorageKey,storage:institutionalSessionStorage},
   });
 }
 export async function signInByIdentification(identification:string,password:string){

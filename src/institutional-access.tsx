@@ -1,10 +1,16 @@
-import {useEffect,useState,type FormEvent,type ReactNode} from 'react';
+import {createContext,useContext,useEffect,useRef,useState,type FormEvent,type ReactNode} from 'react';
 import type {Session} from '@supabase/supabase-js';
-import {configured,institutionalClient,signInByIdentification} from './lib/supabase';
-import {adoptReportClient} from './lib/report-backend';
+import {configured,institutionalClient,institutionalSessionStorage,signInByIdentification} from './lib/supabase';
+import {finishSessionLogout} from './lib/session-logout';
+import {adoptReportClient,clearReportSession} from './lib/report-backend';
 
 type Account={identification:string;name:string;active:boolean;mustChangePassword:boolean;permissions:string[]};
 export let currentInstitutionalAccount:Account|null=null;
+const LogoutContext=createContext<null|(()=>Promise<void>)>(null);
+export function InstitutionalLogoutButton({className,children='Cerrar sesión'}:{className?:string;children?:ReactNode}){
+  const close=useContext(LogoutContext);
+  return <button type="button" className={className} disabled={!close} onClick={()=>{void close?.()}}>{children}</button>;
+}
 
 export function InstitutionalAccess({children}:{children:ReactNode}){
   const [session,setSession]=useState<Session|null>(null);
@@ -17,13 +23,27 @@ export function InstitutionalAccess({children}:{children:ReactNode}){
   const [sentTo,setSentTo]=useState('');
   const [revision,setRevision]=useState(0);
   const [resetting,setResetting]=useState(()=>/type=(recovery|magiclink)/.test(location.hash));
+  const closingRef=useRef(false);
+  const [closing,setClosing]=useState(false);
+  function clearAccess(){
+    setSession(null);setAccount(null);currentInstitutionalAccount=null;
+    setResetting(false);setActivation(false);setSentTo('');setMessage('');setError('');
+    clearReportSession();
+  }
+  async function closeSession(){
+    if(closingRef.current)return;
+    closingRef.current=true;setClosing(true);clearAccess();
+    await finishSessionLogout(institutionalClient().auth,
+      ()=>institutionalSessionStorage.forget(),
+      ()=>window.location.replace(window.location.origin+window.location.pathname));
+  }
   useEffect(()=>{
     if(!configured){setStarting(false);return}
     const client=institutionalClient();
     let active=true;
-    void client.auth.getSession().then(({data})=>{if(active){setSession(data.session);setStarting(false)}});
+    void client.auth.getSession().then(({data})=>{if(active&&!closingRef.current){setSession(data.session);setStarting(false)}});
     const {data:{subscription}}=client.auth.onAuthStateChange((_event,next)=>{
-      if(active){setSession(next);if(!next){setAccount(null);currentInstitutionalAccount=null}}
+      if(active&&!closingRef.current){if(next)setSession(next);else clearAccess()}
     });
     return ()=>{active=false;subscription.unsubscribe()};
   },[]);
@@ -35,8 +55,8 @@ export function InstitutionalAccess({children}:{children:ReactNode}){
       const client=institutionalClient();
       const {data,error}=await client.rpc('current_account');
       if(error||!data?.active)throw Error('Esta cuenta todavía no está autorizada. Consulte al administrador.');
-      if(!data.mustChangePassword)await adoptReportClient(client);
-      if(active){setAccount(data);currentInstitutionalAccount=data}
+      if(!data.mustChangePassword)await adoptReportClient(client,()=>active&&!closingRef.current);
+      if(active&&!closingRef.current){setAccount(data);currentInstitutionalAccount=data}
     })().catch(err=>{if(active)setError((err as Error).message)});
     return ()=>{active=false};
   },[session?.user.id,revision]);
@@ -77,7 +97,8 @@ export function InstitutionalAccess({children}:{children:ReactNode}){
     }catch(err){setError((err as Error).message)}
     finally{setBusy(false)}
   }
-  if(session&&account&&!account.mustChangePassword&&!resetting)return <div key={session.user.id}>{children}</div>;
+  if(closing)return <main className="login-page"><section className="card login-card"><p role="status">Cerrando sesión…</p></section></main>;
+  if(session&&account&&!account.mustChangePassword&&!resetting)return <LogoutContext.Provider value={closeSession}><div key={session.user.id}>{children}</div></LogoutContext.Provider>;
   return <main className="login-page"><section className="card login-card">
     <img src={`${import.meta.env.BASE_URL}assets/escudo.jpeg`} alt="Escudo CTP Cañas" width="90"/>
     <p className="eyebrow">COLEGIO TÉCNICO PROFESIONAL DE CAÑAS</p>
@@ -95,6 +116,6 @@ export function InstitutionalAccess({children}:{children:ReactNode}){
     {error&&<p role="alert" className="error-banner">{error}</p>}
     {message&&<p role="status" className="success-banner">{message}</p>}
     {!session&&configured&&<button className="text-button" onClick={()=>{setActivation(value=>!value);setSentTo('');setError('');setMessage('')}}>{activation?'Ingresar con cédula':'Activar cuenta o recuperar acceso'}</button>}
-    {session&&<button className="button secondary" onClick={()=>void institutionalClient().auth.signOut()}>Cerrar sesión</button>}
+    {session&&<button type="button" className="button secondary" onClick={()=>{void closeSession()}}>Cerrar sesión</button>}
   </section></main>;
 }
