@@ -20,9 +20,22 @@ En el proyecto Supabase de matrícula se consultaron los conteos iniciales y se 
 
 Los avisos informativos de tablas privadas sin políticas corresponden a tablas internas con denegación por defecto y acceso de servicio o funciones restringidas.
 
+## Publicación verificada el 23 de noviembre de 2026
+
+- Sitio: https://ctp-canas.github.io/m/
+- Código: https://github.com/ctp-canas/m
+- GitHub Actions completó instalación de dependencias, comprobación de tipos, 90 pruebas, compilación y despliegue correctamente.
+- Ejecución: https://github.com/ctp-canas/m/actions/runs/45246850581
+- Se verificó la pantalla pública de ingreso, la carga del escudo y Arial como familia CSS principal.
+- Una consulta posterior confirmó cero estudiantes, matrículas, especialidades, cursos y grupos.
+- No se realizó el ingreso con una contraseña del administrador ni se crearon estudiantes de prueba en producción.
+
+## Primer ingreso
+
+Seleccione «Activar cuenta o recuperar acceso» y utilice el correo autorizado de la administración. Copie el enlace de acceso del correo y péguelo en el campo de verificación del sitio. Establezca una contraseña personal y, después, cree el curso lectivo y configure las especialidades y grupos. Las contraseñas y los códigos de verificación no deben compartirse en conversaciones.
+
 ## Pendientes de cierre
 
-- Repositorio público `ctp-canas/m` creado y Pages configurado para GitHub Actions.
-- Verificar el despliegue del flujo y la URL final.
 - Instalar Arial autorizado para alojamiento e incrustación antes de validar la descarga final de PDF.
 - Completar la prueba del primer ingreso por correo y la impresión desde el sitio publicado.
+- Actualizar las versiones de GitHub Actions cuando corresponda: GitHub informó advertencias de compatibilidad de Node.js en las acciones utilizadas; no impidieron este despliegue.

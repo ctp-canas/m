@@ -1,5 +1,8 @@
 # Matrícula · CTP Cañas
 
+Sitio publicado: https://ctp-canas.github.io/m/
+
+
 Gestión institucional en español. Los expedientes se consultan y guardan en Supabase con autenticación por cédula, permisos y transacciones. La instalación inicia sin estudiantes, matrículas, especialidades, cursos ni grupos.
 
 ## Preparación
