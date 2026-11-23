@@ -1,0 +1,44 @@
+{
+  "name": "ctp-canas-matricula",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "tsc -b && vite build",
+    "test": "vitest run",
+    "typecheck": "tsc -b"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.57.4",
+    "@hookform/resolvers": "5.2.2",
+    "@tanstack/react-table": "8.21.3",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "lucide-react": "0.468.0",
+    "recharts": "3.2.1",
+    "react-hook-form": "7.62.0",
+    "zod": "4.6.7",
+    "jspdf": "4.2.1",
+    "jspdf-autotable": "5.0.9",
+    "exceljs": "4.4.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.1.16",
+    "@types/react-dom": "19.1.9",
+    "@vitejs/plugin-react": "5.0.4",
+    "typescript": "5.9.3",
+    "vite": "7.3.7",
+    "vitest": "5.1.0",
+    "tailwindcss": "4.1.14",
+    "@tailwindcss/vite": "4.1.14",
+    "fake-indexeddb": "6.2.4",
+    "@electric-sql/pglite": "0.5.15",
+    "supabase": "3.0.0"
+  },
+  "overrides": {
+    "exceljs": {
+      "uuid": "11.1.1"
+    }
+  }
+}

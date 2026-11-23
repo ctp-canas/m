@@ -1,0 +1,1 @@
+-- La instalación institucional inicia sin datos de matrícula ni catálogos precargados.
