@@ -118,3 +118,21 @@ it('limita a 17 una especialidad aunque se reparta en subgrupos de la misma secc
   state.enrollments.push({...blankEnrollment(st.id,2027,[]),grade:10,section:'1',subgroup:'B',specialty,status:'Activo'});
   await expect(save(state)).rejects.toThrow(/especialidad.*17/);
 });
+
+it('guarda, consulta y elimina el teléfono opcional sin cambiar encargados ni matrícula',async()=>{
+  // Normalize optional metadata from the records inserted by preceding tests.
+  let state=await save(await load());
+  const id=state.students[0].id;
+  const guardians=structuredClone(state.students[0].guardians);
+  const enrollments=structuredClone(state.enrollments);
+  state.students[0].phone='+506 8888-0000';
+  await save(state);
+  state=await load();
+  expect(state.students.find(s=>s.id===id)?.phone).toBe('+506 8888-0000');
+  expect(state.students.find(s=>s.id===id)?.guardians).toEqual(guardians);
+  expect(state.enrollments).toEqual(enrollments);
+  expect((await pg.query<{phone:string}>('select details->>\'phone\' as phone from public.students where id=$1',[id])).rows[0].phone).toBe('+506 8888-0000');
+  state.students.find(s=>s.id===id)!.phone='';
+  await save(state);
+  expect((await load()).students.find(s=>s.id===id)?.phone).toBe('');
+});
