@@ -24,6 +24,8 @@ it('la plantilla tiene los doce encabezados exactos y no importa los ejemplos de
   expect(book.worksheets[0].rowCount).toBeLessThanOrEqual(3001);
   expect(book.worksheets[0].getCell('A2').numFmt).toBe('@');
   expect(book.worksheets[0].getCell('L2').numFmt).toBe('@');
+  const exampleDate=book.worksheets[1].getCell('C16').value;
+  expect(exampleDate instanceof Date?exampleDate.toISOString().slice(0,10):exampleDate).toBe('2013-01-15');
   const file={name:'plantilla.xlsx',arrayBuffer:async()=>Uint8Array.from(bytes).buffer} as File;
   expect(await readSheet(file)).toEqual([]);
 });
