@@ -94,6 +94,10 @@ export async function buildReportPdf(rr:Row[],requested:string[],title:string,ye
   return finish();
 }
 export async function template(){
-  await downloadSheet([['identificacion','nombre','primer_apellido','segundo_apellido','fecha_nacimiento','genero','nivel','seccion','subgrupo','especialidad','centro_educativo_de_procedencia'],['DEMO99999','Estudiante','De Prueba','','2013-01-01','No indicado',7,'1','A','','']],'Plantilla_matricula_CTP_Canas.xlsx','Estudiantes');
+  const link=document.createElement('a');
+  link.href=`${import.meta.env.BASE_URL}templates/Plantilla_importacion_estudiantes_CTP_Canas.xlsx`;
+  link.download='Plantilla_importacion_estudiantes_CTP_Canas.xlsx';
+  link.click();
 }
+
 export {fullName};
